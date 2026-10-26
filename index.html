@@ -194,6 +194,19 @@ footer .end{font-family:var(--nk);color:var(--beige);font-size:18px;margin-top:6
 .track::-webkit-scrollbar{display:none}
 .slide{flex:0 0 100%;scroll-snap-align:center;position:relative;overflow:hidden;display:flex;align-items:flex-end;justify-content:center;gap:4%;height:clamp(330px,54vh,540px);padding-bottom:9%}
 .slide .bw{position:relative;height:84%;aspect-ratio:466/1420;transform:rotate(-5deg);transform-origin:50% 100%;flex:none}
+/* scene slide: gold arch + oil splash + the perfume's own ingredients floating (white photo backgrounds drop out via multiply) */
+.slide.scene{--sh:clamp(330px,54vh,540px);padding-bottom:8%;background:radial-gradient(80% 60% at 50% 38%,#FFFFFF 0%,#F7F2EA 58%,#EFE6D8 100%)}
+.slide.scene .arch{position:absolute;left:50%;top:7%;height:84%;aspect-ratio:236/400;translate:-50% 0;border-radius:999px 999px 6px 6px;z-index:1;
+  background:linear-gradient(180deg,#E9DDC8 0%,#F3ECE0 72%,rgba(247,242,234,0) 100%);box-shadow:inset 0 30px 60px -30px rgba(120,90,50,.25)}
+.slide.scene .arch2{position:absolute;left:50%;top:4%;height:88%;aspect-ratio:264/420;translate:-50% 0;border-radius:999px 999px 0 0;border:1px solid rgba(181,150,95,.55);border-bottom:0;z-index:1}
+.slide.scene .splash{position:absolute;left:50%;bottom:1%;height:44%;translate:-50% 0;mix-blend-mode:multiply;z-index:3}
+.slide.scene .bw{height:70%;z-index:10;filter:drop-shadow(0 22px 20px rgba(60,40,20,.25))}
+.fn{position:absolute;width:calc(var(--sh) * var(--d));margin:calc(var(--sh) * var(--d) / -2) 0 0 calc(var(--sh) * var(--d) / -2);mix-blend-mode:multiply;z-index:12;cursor:pointer;
+  animation:fnIn .9s var(--ease) both,fnBob var(--bt) ease-in-out infinite;animation-delay:var(--dl),calc(var(--dl) + .9s)}
+.fn img{width:100%;display:block;pointer-events:none}
+@keyframes fnIn{from{opacity:0;translate:var(--fx) 0}}
+@keyframes fnBob{0%,100%{transform:translateY(0) rotate(var(--r))}50%{transform:translateY(-10px) rotate(calc(var(--r) * -.4))}}
+.fpill{position:absolute;left:0;top:0;z-index:30;background:var(--t900);color:#fff;font-size:12px;font-weight:600;padding:3px 11px;border-radius:12px;opacity:0;transition:opacity .3s;pointer-events:none;white-space:nowrap}
 .slide .bw img{height:100%;width:100%}
 .slide.duo .bw{height:80%}
 .slide .orig{max-height:62%;max-width:48%;object-fit:contain;filter:drop-shadow(0 16px 22px rgba(3,60,66,.22))}
@@ -204,7 +217,7 @@ footer .end{font-family:var(--nk);color:var(--beige);font-size:18px;margin-top:6
 .dots{position:absolute;left:0;right:0;bottom:14px;display:flex;justify-content:center;gap:8px}
 .dots button{width:9px;height:9px;border-radius:9px;border:0;background:rgba(3,60,66,.25);cursor:pointer;transition:all .3s var(--ease)}
 .dots button.on{width:26px;background:var(--t800)}
-.nav{position:absolute;top:50%;translate:0 -50%;width:42px;height:42px;border-radius:50%;border:0;background:rgba(255,255,255,.92);display:grid;place-items:center;cursor:pointer;box-shadow:0 6px 16px -8px rgba(3,60,66,.45);transition:opacity .2s;z-index:3}
+.nav{position:absolute;bottom:8px;width:38px;height:38px;border-radius:50%;border:0;background:rgba(255,255,255,.92);display:grid;place-items:center;cursor:pointer;box-shadow:0 6px 16px -8px rgba(3,60,66,.45);transition:opacity .2s;z-index:3}
 .nav svg{width:18px;height:18px;color:var(--t800)}
 .nav.prev{right:14px}.nav.next{left:14px}
 .nav[disabled]{opacity:0;pointer-events:none}
@@ -389,11 +402,22 @@ const R = 'M9 6l6 6-6 6', L = 'M15 6l-6 6 6 6';
 function openSheet(i, push){
   const it = items[i]; cur = view.indexOf(it); const f = fams[it.fam];
   const corner = '';
+  // first slide: the ADF bottle on the gold arch with this perfume's own ingredients floating around it
+  // top notes float high, heart notes at mid height, base notes low, so the scene reads as the scent pyramid
+  const tierNotes = it.b.map(b => b[1].split('،').map(s => s.trim()).filter(n => (window.NOTE_IMG || {})[n]));
+  const single = it.b.length === 1, rows = [20, 50, 79], nSingle = single ? tierNotes[0].length : 0;
+  let fi = 0;
+  const floats = tierNotes.flatMap((ns, ti) => ns.map((n, j) => {
+    // one undivided notes list: spread top-to-bottom evenly; otherwise one row per tier
+    const slot = single ? fi : ti * 2 + j, row = single ? (nSingle === 1 ? 45 : Math.round(24 + slot * 52 / (nSingle - 1))) : rows[Math.min(ti, 2)];
+    const side = (slot + (single ? 0 : ti)) % 2 ? 1 : 0, x = side ? 84 : 16, y = row + (!single && j ? 6 : 0), d = [.19, .21, .23][Math.min(2, Math.round(row / 30) - 1 < 0 ? 0 : Math.round(row / 30) - 1)];
+    return `<div class="fn" data-n="${esc(n)}" style="left:${x}%;top:${y}%;--d:${d};--fx:${side ? 70 : -70}px;--dl:${(.25 + fi++ * .09).toFixed(2)}s;--bt:${(5.5 + fi % 3 * .8).toFixed(1)}s;--r:${side ? 8 : -8}deg"><img src="img/notes/${window.NOTE_IMG[n]}.jpg" alt=""></div>`; })).join('');
+  const scene = `<div class="slide scene"><span class="tag">${floats ? 'القنينة ومكوّناتها' : 'قنينة ADF'}</span><i class="arch2"></i><i class="arch"></i><img class="splash" src="img/ui/fx_splash.png" alt="">${adf(it, true)}${floats}<span class="fpill"></span></div>`;
   const sl = it.ref
-    ? [`<div class="slide duo">${corner}<span class="tag">القنينة والعطر الأصلي</span><img class="orig" src="img/ref/${it.ref}.webp" alt="">${adf(it, true)}</div>`,
-       `<div class="slide">${corner}<span class="tag">قنينة ADF</span>${adf(it, true)}</div>`,
+    ? [scene,
+       `<div class="slide duo">${corner}<span class="tag">القنينة والعطر الأصلي</span><img class="orig" src="img/ref/${it.ref}.webp" alt="">${adf(it, true)}</div>`,
        `<div class="slide solo">${corner}<span class="tag">العطر الأصلي</span><img class="orig" src="img/ref/${it.ref}.webp" alt=""></div>`]
-    : [`<div class="slide">${corner}<span class="tag">قنينة ADF</span>${adf(it, true)}</div>`];
+    : [scene];
   // each tier lists its notes as photos; a note whose photo isn't confirmed shows its name only
   const TL = {'مقدمة':'مقدمة · أول ما تشمّه', 'قلب':'قلب · روح العطر', 'قاعدة':'قاعدة · اللي يبقى على الجلد'};
   let k = 0;
@@ -423,6 +447,12 @@ function openSheet(i, push){
   $('sbody').querySelectorAll('.lbl').forEach(e => e.dataset.fs = e.style.fontSize);
   requestAnimationFrame(refit); setTimeout(refit, 450); $('sbody').querySelectorAll('.bw img').forEach(im => im.complete || im.addEventListener('load', refit, {once:true}));
   if (document.fonts) document.fonts.ready.then(refit);
+  // tap a floating ingredient to see its name
+  const scn = $('sbody').querySelector('.slide.scene'), fp = scn && scn.querySelector('.fpill');
+  if (fp) scn.querySelectorAll('.fn').forEach(el => el.addEventListener('click', () => {
+    const b = el.getBoundingClientRect(), s = scn.getBoundingClientRect(); fp.textContent = el.dataset.n;
+    fp.style.transform = `translate(${b.left - s.left + b.width / 2}px, ${b.bottom - s.top - 4}px) translateX(-50%)`; fp.style.opacity = 1;
+    clearTimeout(fp._t); fp._t = setTimeout(() => fp.style.opacity = 0, 1600); }));
   const tr = $('track');
   if (sl.length > 1) {
     const go = k => tr.scrollTo({left: -k * tr.clientWidth, behavior:'smooth'});
