@@ -109,7 +109,27 @@ main{position:relative;z-index:1;max-width:1280px;margin:0 auto;padding:6px 20px
 .cat-head .r{font-size:13px;color:var(--grey);text-align:left}
 
 /* ---------- grid of PDF tiles ---------- */
-.grid{display:grid;grid-template-columns:minmax(0,1fr);gap:26px;margin-top:24px;max-width:440px;margin-inline:auto}
+.grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px 10px;margin-top:20px}
+/* phones: two tiles per row, so the tile keeps only what reads at a glance (bottle, name, price); notes stay as colour bands and show in full in the sheet */
+@media (max-width:559px){
+  .cell .tile{grid-template-rows:1fr 132px}
+  .cell .tile .bnd{padding:0}
+  .cell .tile .bnd:first-child{padding-top:0}
+  .cell .tile .bnd em,.cell .tile .bnd span{display:none}
+  .cell .tile .bw{left:50%;translate:-50% 0;height:226px}
+  .cell .tile .shd{left:50%;translate:-50% 0}
+  .cell .tile .ref{left:70px;bottom:22px}
+  .cell .tile .ref ~ .bw{left:150px;translate:none;height:206px}
+  .cell .tile .ref ~ .shd{left:140px;translate:none}
+  .cell .tile .tf{grid-template-columns:minmax(0,1fr);align-content:center;row-gap:2px;padding:12px 18px}
+  .cell .tile .tf .nm{font-size:32px !important;line-height:1.3}
+  .cell .tile .tf .mt{display:none}
+  .cell .tile .tf .pr{grid-row:auto;grid-column:auto;display:flex;align-items:baseline;gap:8px;font-size:60px}
+  .cell .tile .tf .pr small{font-size:30px}
+  .cell .tile .tf .pr span{display:inline;font-size:22px;margin:0}
+  .cell .tile .tf .pr.tbd{font-size:26px}
+  .cell .tile .new{font-size:22px;padding:2px 16px;top:12px;right:14px}
+}
 @media (min-width:560px){.grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:24px 14px;max-width:none}}
 @media (min-width:820px){.grid{grid-template-columns:repeat(3,minmax(0,1fr));gap:26px 16px}}
 @media (min-width:1000px){.grid{grid-template-columns:repeat(4,minmax(0,1fr))}}
@@ -208,6 +228,35 @@ footer .end{font-family:var(--nk);color:var(--beige);font-size:18px;margin-top:6
 .walk button svg{width:16px;height:16px}
 .walk button[disabled]{opacity:.35;pointer-events:none}
 .note{font-size:12px;color:var(--grey);margin-top:12px;text-align:center}
+/* ---------- motion ---------- */
+@keyframes rise{from{opacity:0;transform:translateY(22px)}to{opacity:1;transform:none}}
+@keyframes pop{from{opacity:0;scale:.85}to{opacity:1;scale:1}}
+@keyframes bottleIn{from{opacity:0;scale:.7}to{opacity:1;scale:1}}
+@keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(-8px)}}
+@keyframes slideIn{from{opacity:0;transform:translateY(40px) rotate(4deg)}to{opacity:1;transform:none}}
+@keyframes fadeSide{from{opacity:0;translate:-30px 0}to{opacity:1;translate:0 0}}
+.top .logos{animation:rise .7s var(--ease) both}
+.top .kick{animation:rise .7s var(--ease) .1s both}
+.top h1{animation:rise .8s var(--ease) .18s both}
+.top .ar{animation:rise .8s var(--ease) .28s both}
+.top .trio{animation:float 6s ease-in-out 1.4s infinite}
+.top .trio img{animation:bottleIn .9s var(--ease) both;transform-origin:50% 100%}
+.top .trio .a{animation-delay:.35s}.top .trio .c{animation-delay:.45s}.top .trio .b{animation-delay:.55s}
+.search{animation:rise .7s var(--ease) .45s both}
+.chip{animation:pop .5s var(--ease) both;animation-delay:calc(.55s + var(--i,0) * 55ms)}
+.sub{animation:rise .6s var(--ease) .8s both}
+html.anim .cell{opacity:0;transform:translateY(24px);transition:opacity .55s var(--ease),transform .65s var(--ease);transition-delay:var(--d,0s)}
+html.anim .cell.in{opacity:1;transform:none}
+html.anim .banner{opacity:0;transform:translateY(26px);transition:opacity .6s var(--ease),transform .7s var(--ease)}
+html.anim .banner .art img{scale:1.18;transition:scale 1.4s var(--ease)}
+html.anim .fam-sec.in .banner{opacity:1;transform:none}
+html.anim .fam-sec.in .banner .art img{scale:1}
+.sheet.on .slide .bw{animation:slideIn .7s var(--ease) .12s both}
+.sheet.on .slide .orig{animation:fadeSide .7s var(--ease) .25s both}
+.sheet.on .det > *{animation:rise .55s var(--ease) both}
+.sheet.on .det > :nth-child(2){animation-delay:.08s}.sheet.on .det > :nth-child(3){animation-delay:.14s}.sheet.on .det > :nth-child(4){animation-delay:.2s}.sheet.on .det > :nth-child(5){animation-delay:.26s}.sheet.on .det > :nth-child(6){animation-delay:.32s}.sheet.on .det > :nth-child(7){animation-delay:.38s}
+.tier{transition:filter .2s}
+@media (prefers-reduced-motion:reduce){html.anim .cell,html.anim .banner{opacity:1 !important;transform:none !important}html.anim .banner .art img{scale:1 !important}}
 @media (prefers-reduced-motion:reduce){*{animation:none !important;transition:none !important;scroll-behavior:auto !important}}
 </style>
 </head>
@@ -268,7 +317,12 @@ function tile(it){
     <div class="tf"><div class="nm"${it.nm.length > 20 ? ' style="font-size:17px"' : ''}>${esc(it.nm)}</div>${pr}<div class="mt">${esc(it.mt) || '&nbsp;'}</div></div></div></div>`;
 }
 const fitLbl = e => { const b = e.firstElementChild; if (!e.clientHeight || !e.clientWidth) return; let fs = parseFloat(e.style.fontSize); let n = 0; while ((b.scrollWidth > b.clientWidth || b.scrollHeight > e.clientHeight) && fs > 4.5 && n++ < 200) { fs -= fs > 30 ? .5 : .25; e.style.fontSize = fs + 'px'; } };
-const seenIO = { observe(){} };
+// tiles and family banners rise in as they scroll into view; ones entering together are staggered
+const seenIO = window.IntersectionObserver ? new IntersectionObserver(es => {
+  let n = 0;
+  es.forEach(e => { if (!e.isIntersecting) return; e.target.style.setProperty('--d', Math.min(n++ * 70, 350) + 'ms'); e.target.classList.add('in'); seenIO.unobserve(e.target); });
+}, {rootMargin: '0px 0px -6% 0px'}) : { observe(){} };
+if (window.IntersectionObserver) document.documentElement.classList.add('anim');
 
 function banner(f, list){
   const F = fams[f]; const ps = list.filter(x => x.k > 0).map(x => x.k);
@@ -280,7 +334,7 @@ function banner(f, list){
 // chips
 const counts = {}; items.forEach(it => counts[it.fam] = (counts[it.fam]||0) + 1);
 $('chips').innerHTML = `<button class="chip on" data-f="">الكل <small class="ltr">${items.length}</small></button>` +
-  order.map(f => `<button class="chip" data-f="${f}" style="--fc:${fams[f].c}"><img src="img/ui/${f}.png" alt="">${fams[f].ar} <small class="ltr">${counts[f]}</small></button>`).join('');
+  order.map((f, k) => `<button class="chip" data-f="${f}" style="--fc:${fams[f].c};--i:${k + 1}"><img src="img/ui/${f}.png" alt="">${fams[f].ar} <small class="ltr">${counts[f]}</small></button>`).join('');
 
 const st = {q:'', f:'', g:'', sort:'fam'};
 let view = [];
@@ -303,7 +357,7 @@ function apply(){
   $('count').innerHTML = `<b class="ltr">${view.length}</b> عطراً`;
   requestAnimationFrame(() => document.querySelectorAll('.cell .lbl').forEach(fitLbl));
   $('empty').classList.toggle('on', !view.length);
-  document.querySelectorAll('.cell').forEach(c => seenIO.observe(c));
+  document.querySelectorAll('.cell, .fam-sec').forEach(c => seenIO.observe(c));
   scale();
 }
 // one scale factor for every tile so the 327×373 PDF tile fills its column
