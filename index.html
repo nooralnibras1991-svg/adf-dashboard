@@ -217,11 +217,19 @@ footer .end{font-family:var(--nk);color:var(--beige);font-size:18px;margin-top:6
 .det .price .v{font-family:var(--lat);font-weight:700;font-size:46px;line-height:1;color:var(--beige);direction:ltr}
 .det .price .v small{font-size:23px}
 .det .price span{font-size:13px;color:rgba(255,255,255,.6)}
-.pyr{margin-top:16px;border-radius:10px;overflow:hidden}
-.tier{display:grid;grid-template-columns:60px 1fr;gap:10px;align-items:center;padding:14px 16px;background:var(--tb)}
-.tier+.tier{border-top:1px solid rgba(255,255,255,.75)}
-.tier em{font-style:normal;font-size:12.5px;font-weight:700;color:rgba(19,41,43,.55)}
-.tier span{font-size:15px;line-height:1.6;font-weight:500}
+/* note photos: one band per tier, each note a real photo in a white disc */
+.nh{display:flex;align-items:center;gap:10px;margin:22px 0 4px;font-family:var(--nk);font-size:20px;font-weight:700;color:var(--t900)}
+.nh::before{content:"";width:22px;height:2px;background:var(--t800)}
+.tier{border-radius:14px;background:var(--tb);padding:12px 12px 14px;margin-top:10px}
+.tier em{display:block;font-style:normal;font-size:12.5px;font-weight:700;color:rgba(19,41,43,.55);margin-bottom:8px}
+.notes{display:grid;grid-template-columns:repeat(var(--n,2),minmax(0,1fr));gap:12px}
+.nt{display:flex;flex-direction:column;align-items:center;gap:6px;min-width:0}
+.disc{width:100%;max-width:118px;aspect-ratio:1;border-radius:50%;background:#fff;box-shadow:0 10px 20px -12px rgba(3,60,66,.5),0 0 0 4px rgba(255,255,255,.65);overflow:hidden;display:grid;place-items:center}
+.disc img{width:100%;height:100%;object-fit:cover;scale:1.08}
+.disc.none{background:rgba(255,255,255,.55);box-shadow:none;border:1.5px dashed rgba(19,41,43,.18)}
+.disc.none i{font-style:normal;font-family:var(--nk);font-size:30px;color:rgba(19,41,43,.3)}
+.nt b{font-size:14px;font-weight:600;color:var(--ink);text-align:center;line-height:1.35}
+.sheet.on .nt{animation:pop .5s var(--ease) both;animation-delay:calc(.3s + var(--k,0) * 70ms)}
 .walk{display:flex;gap:10px;margin-top:16px}
 .walk button{flex:1;display:flex;align-items:center;justify-content:center;gap:8px;height:48px;border-radius:10px;border:1px solid var(--line);background:#fff;font-weight:600;color:var(--t800);cursor:pointer;font-size:14px}
 .walk button svg{width:16px;height:16px}
@@ -292,6 +300,7 @@ html.anim .fam-sec.in .banner .art img{scale:1}
 </section>
 
 <script src="data.js"></script>
+<script src="notes_map.js"></script>
 <script>
 (function(){
 const {fams, order, items} = window.ADF;
@@ -385,13 +394,18 @@ function openSheet(i, push){
        `<div class="slide">${corner}<span class="tag">قنينة ADF</span>${adf(it, true)}</div>`,
        `<div class="slide solo">${corner}<span class="tag">العطر الأصلي</span><img class="orig" src="img/ref/${it.ref}.webp" alt=""></div>`]
     : [`<div class="slide">${corner}<span class="tag">قنينة ADF</span>${adf(it, true)}</div>`];
-  const tiers = it.b.map(b => `<div class="tier" style="--tb:${b[2]}"><em>${esc(b[0])}</em><span>${esc(b[1])}</span></div>`).join('');
+  // each tier lists its notes as photos; a note whose photo isn't confirmed shows its name only
+  const TL = {'مقدمة':'مقدمة · أول ما تشمّه', 'قلب':'قلب · روح العطر', 'قاعدة':'قاعدة · اللي يبقى على الجلد'};
+  let k = 0;
+  const tiers = it.b.map(b => { const ns = b[1].split('،').map(s => s.trim()).filter(Boolean);
+    return `<div class="tier" style="--tb:${b[2]}"><em>${esc(TL[b[0]] || b[0])}</em><div class="notes" style="--n:${Math.min(ns.length, 3)}">${ns.map(n => { const key = (window.NOTE_IMG || {})[n];
+      return `<div class="nt" style="--k:${k++}">${key ? `<div class="disc"><img src="img/notes/${key}.jpg" alt="" loading="lazy" onerror="this.parentNode.className='disc none';this.outerHTML='<i>${esc(n).charAt(0)}</i>'"></div>` : `<div class="disc none"><i>${esc(n).charAt(0)}</i></div>`}<b>${esc(n)}</b></div>`; }).join('')}</div></div>`; }).join('');
   $('sbody').innerHTML = `<div class="car"><div class="track" id="track">${sl.join('')}</div>
       ${sl.length > 1 ? `<button class="nav prev" id="pv" aria-label="السابق">${arrow(R)}</button><button class="nav next" id="nx" aria-label="التالي">${arrow(L)}</button><div class="dots" id="dots">${sl.map((_,k) => `<button class="${k ? '' : 'on'}" data-k="${k}" aria-label="صورة ${k+1}"></button>`).join('')}</div>` : ''}</div>
     <div class="det"><span class="fam"><img src="img/ui/${it.fam}.png" alt="">${f.ar}${it.g ? ' · ' + it.g : ''}</span>
       <h2 id="pname">${esc(it.nm)}</h2>${it.mt && it.mt !== it.g ? `<div class="s2">${esc(it.mt)}</div>` : ''}
       <div class="price"><span>سعر الكيلو</span>${it.k > 0 ? `<div class="v"><small>$</small>${fmt(it.k)}</div>` : '<div class="v" style="font-family:var(--ar);font-size:20px">عند الطلب</div>'}</div>
-      ${tiers ? `<div class="pyr">${tiers}</div>` : ''}
+      ${tiers ? `<div class="nh">مكوّنات العطر</div>${tiers}` : ''}
       <div class="walk"><button id="wprev" ${cur > 0 ? '' : 'disabled'}>${arrow(R)} العطر السابق</button><button id="wnext" ${cur < view.length - 1 ? '' : 'disabled'}>العطر التالي ${arrow(L)}</button></div>
       <div class="note">الأسعار تُؤكَّد عند الطلب</div></div>`;
   $('sbody').scrollTop = 0;
