@@ -181,9 +181,17 @@ footer .end{font-family:var(--nk);color:var(--beige);font-size:18px;margin-top:6
 @media (min-width:900px){
   .sheet{left:50%;right:auto;top:50%;bottom:auto;width:min(1000px,92vw);max-height:88vh;border-radius:16px;transform:translate(-50%,-46%) scale(.96);opacity:0;pointer-events:none;transition:transform .4s var(--ease),opacity .3s var(--ease)}
   .sheet.on{transform:translate(-50%,-50%);opacity:1;pointer-events:auto}
-  .sheet .body{display:grid !important;grid-template-columns:1.05fr 1fr}
+  .sheet .body{display:grid !important;grid-template-columns:1.05fr 1fr;align-items:start}
   .sheet .handle{display:none}
+  /* the picture column fills the full sheet height and stays put while the details scroll */
+  .sheet .car{position:sticky;top:0;height:88vh}
+  .sheet .slide{height:88vh}
+  .sheet .slide.scene{--sh:88vh}
 }
+/* phones: no blur behind the sheet (expensive on mobile GPUs) */
+@media (max-width:700px){.scrim{backdrop-filter:none;-webkit-backdrop-filter:none;background:rgba(2,43,48,.72)}}
+/* off-screen tiles skip layout and paint until they scroll near the viewport */
+.cell{content-visibility:auto}
 .handle{width:44px;height:5px;border-radius:5px;background:#D5CEC2;margin:10px auto 0;flex:none}
 .sheet .x{position:absolute;left:14px;top:14px;z-index:6;width:40px;height:40px;border-radius:50%;border:0;background:rgba(255,255,255,.92);box-shadow:0 4px 12px -6px rgba(3,60,66,.4);display:grid;place-items:center;cursor:pointer}
 .sheet .x svg{width:18px;height:18px}
@@ -203,7 +211,9 @@ footer .end{font-family:var(--nk);color:var(--beige);font-size:18px;margin-top:6
 .slide.scene .bw{height:70%;z-index:10;filter:drop-shadow(0 22px 20px rgba(60,40,20,.25))}
 .fn{position:absolute;width:calc(var(--sh) * var(--d));margin:calc(var(--sh) * var(--d) / -2) 0 0 calc(var(--sh) * var(--d) / -2);mix-blend-mode:multiply;z-index:12;cursor:pointer;
   animation:fnIn .9s var(--ease) both,fnBob var(--bt) ease-in-out infinite;animation-delay:var(--dl),calc(var(--dl) + .9s)}
-.fn img{width:100%;display:block;pointer-events:none}
+.fn img{width:100%;display:block;pointer-events:none;-webkit-mask-image:radial-gradient(closest-side,#000 74%,transparent 100%);mask-image:radial-gradient(closest-side,#000 74%,transparent 100%)}
+.fn .fnl{position:absolute;left:50%;top:100%;translate:-50% -6px;background:var(--t900);color:#fff;font-size:12px;font-weight:700;padding:4px 12px;border-radius:14px;white-space:nowrap;box-shadow:0 6px 14px -8px rgba(2,43,48,.6)}
+.fn{isolation:auto}
 @keyframes fnIn{from{opacity:0;translate:var(--fx) 0}}
 @keyframes fnBob{0%,100%{transform:translateY(0) rotate(var(--r))}50%{transform:translateY(-10px) rotate(calc(var(--r) * -.4))}}
 .fpill{position:absolute;left:0;top:0;z-index:30;background:var(--t900);color:#fff;font-size:12px;font-weight:600;padding:3px 11px;border-radius:12px;opacity:0;transition:opacity .3s;pointer-events:none;white-space:nowrap}
@@ -341,7 +351,8 @@ const fitLbl = e => { const b = e.firstElementChild; if (!e.clientHeight || !e.c
 // tiles and family banners rise in as they scroll into view; ones entering together are staggered
 const seenIO = window.IntersectionObserver ? new IntersectionObserver(es => {
   let n = 0;
-  es.forEach(e => { if (!e.isIntersecting) return; e.target.style.setProperty('--d', Math.min(n++ * 70, 350) + 'ms'); e.target.classList.add('in'); seenIO.unobserve(e.target); });
+  es.forEach(e => { if (!e.isIntersecting) return; e.target.style.setProperty('--d', Math.min(n++ * 70, 350) + 'ms'); e.target.classList.add('in'); seenIO.unobserve(e.target);
+    const l = e.target.querySelector('.cell .lbl, .lbl'); if (l && e.target.classList.contains('cell')) requestAnimationFrame(() => fitLbl(l)); });
 }, {rootMargin: '0px 0px -6% 0px'}) : { observe(){} };
 if (window.IntersectionObserver) document.documentElement.classList.add('anim');
 
@@ -376,7 +387,8 @@ function apply(){
   } else if (view.length) html = `<div class="grid">${view.map(tile).join('')}</div>`;
   $('out').innerHTML = html;
   $('count').innerHTML = `<b class="ltr">${view.length}</b> عطراً`;
-  requestAnimationFrame(() => document.querySelectorAll('.cell .lbl').forEach(fitLbl));
+  // labels are fitted lazily as each tile scrolls into view (see seenIO), not all 463 at once
+  requestAnimationFrame(() => document.querySelectorAll('.cell.in .lbl').forEach(fitLbl));
   $('empty').classList.toggle('on', !view.length);
   document.querySelectorAll('.cell, .fam-sec').forEach(c => seenIO.observe(c));
   scale();
@@ -411,8 +423,8 @@ function openSheet(i, push){
     // one undivided notes list: spread top-to-bottom evenly; otherwise one row per tier
     const slot = single ? fi : ti * 2 + j, row = single ? (nSingle === 1 ? 45 : Math.round(24 + slot * 52 / (nSingle - 1))) : rows[Math.min(ti, 2)];
     const side = (slot + (single ? 0 : ti)) % 2 ? 1 : 0, x = side ? 84 : 16, y = row + (!single && j ? 6 : 0), d = [.19, .21, .23][Math.min(2, Math.round(row / 30) - 1 < 0 ? 0 : Math.round(row / 30) - 1)];
-    return `<div class="fn" data-n="${esc(n)}" style="left:${x}%;top:${y}%;--d:${d};--fx:${side ? 70 : -70}px;--dl:${(.25 + fi++ * .09).toFixed(2)}s;--bt:${(5.5 + fi % 3 * .8).toFixed(1)}s;--r:${side ? 8 : -8}deg"><img src="img/notes/${window.NOTE_IMG[n]}.jpg" alt=""></div>`; })).join('');
-  const scene = `<div class="slide scene"><span class="tag">${floats ? 'القنينة ومكوّناتها' : 'قنينة ADF'}</span><i class="arch2"></i><i class="arch"></i><img class="splash" src="img/ui/fx_splash.png" alt="">${adf(it, true)}${floats}<span class="fpill"></span></div>`;
+    return `<div class="fn" data-n="${esc(n)}" style="left:${x}%;top:${y}%;--d:${d};--fx:${side ? 70 : -70}px;--dl:${(.25 + fi++ * .09).toFixed(2)}s;--bt:${(5.5 + fi % 3 * .8).toFixed(1)}s;--r:${side ? 3 : -3}deg"><img src="img/notes/${window.NOTE_IMG[n]}.jpg" alt=""><span class="fnl">${esc(n)}</span></div>`; })).join('');
+  const scene = `<div class="slide scene"><span class="tag">${floats ? 'القنينة ومكوّناتها' : 'قنينة ADF'}</span><i class="arch2"></i><i class="arch"></i><img class="splash" src="img/ui/fx_splash.png" alt="">${adf(it, true)}${floats}</div>`;
   const sl = it.ref
     ? [scene,
        `<div class="slide duo">${corner}<span class="tag">القنينة والعطر الأصلي</span><img class="orig" src="img/ref/${it.ref}.webp" alt="">${adf(it, true)}</div>`,
@@ -447,12 +459,6 @@ function openSheet(i, push){
   $('sbody').querySelectorAll('.lbl').forEach(e => e.dataset.fs = e.style.fontSize);
   requestAnimationFrame(refit); setTimeout(refit, 450); $('sbody').querySelectorAll('.bw img').forEach(im => im.complete || im.addEventListener('load', refit, {once:true}));
   if (document.fonts) document.fonts.ready.then(refit);
-  // tap a floating ingredient to see its name
-  const scn = $('sbody').querySelector('.slide.scene'), fp = scn && scn.querySelector('.fpill');
-  if (fp) scn.querySelectorAll('.fn').forEach(el => el.addEventListener('click', () => {
-    const b = el.getBoundingClientRect(), s = scn.getBoundingClientRect(); fp.textContent = el.dataset.n;
-    fp.style.transform = `translate(${b.left - s.left + b.width / 2}px, ${b.bottom - s.top - 4}px) translateX(-50%)`; fp.style.opacity = 1;
-    clearTimeout(fp._t); fp._t = setTimeout(() => fp.style.opacity = 0, 1600); }));
   const tr = $('track');
   if (sl.length > 1) {
     const go = k => tr.scrollTo({left: -k * tr.clientWidth, behavior:'smooth'});
@@ -489,7 +495,7 @@ $('sheet').addEventListener('touchend', e => { if (y0 === null) return; const dy
 // wait for the bottle-label font before measuring, then refit if any font arrives later
 const fontsIn = document.fonts ? Promise.all([document.fonts.load('16px Lalezar', 'عطر'), document.fonts.load('16px "IBM Plex Sans Arabic"', 'عطر')]).then(() => document.fonts.ready).catch(() => {}) : Promise.resolve();
 fontsIn.then(() => { apply(); window.DASH_READY = true; });
-if (document.fonts) document.fonts.addEventListener('loadingdone', () => document.querySelectorAll('.cell .lbl').forEach(fitLbl));
+if (document.fonts) document.fonts.addEventListener('loadingdone', () => document.querySelectorAll('.cell.in .lbl').forEach(fitLbl));
 })();
 </script>
 </body>
