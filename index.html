@@ -4,6 +4,10 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="theme-color" content="#022B30">
+<script>
+// night mode is the default; the visitor's choice is remembered on their phone
+(function(){ var t = 'dark'; try { t = localStorage.getItem('adf_theme') || 'dark'; } catch(e) {} document.documentElement.setAttribute('data-theme', t); })();
+</script>
 <title>عطور ADF · نور النبراس</title>
 <link rel="stylesheet" href="fonts.css">
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;0,600;0,700;1,500&family=Lalezar&display=swap" rel="stylesheet">
@@ -494,12 +498,55 @@ html.anim .fam-sec.in .banner .art img{scale:1}
 body.has-cart .fab{bottom:calc(84px + env(safe-area-inset-bottom))}
 @media (prefers-reduced-motion:reduce){html.anim .cell,html.anim .banner{opacity:1 !important;transform:none !important}html.anim .banner .art img{scale:1 !important}}
 @media (prefers-reduced-motion:reduce){*{animation:none !important;transition:none !important;scroll-behavior:auto !important}}
+/* ---------- night mode (default) ---------- */
+.theme{display:inline-flex;align-items:center;gap:7px;height:36px;padding:0 13px 0 11px;border-radius:20px;border:1px solid rgba(255,255,255,.22);background:rgba(255,255,255,.08);color:#fff;font-size:13px;font-weight:600;cursor:pointer;transition:background .2s}
+.theme:hover{background:rgba(255,255,255,.16)}
+.theme svg{width:17px;height:17px}
+.theme .sun{display:none}
+html[data-theme="dark"] .theme .sun{display:block}
+html[data-theme="dark"] .theme .moon{display:none}
+.top .logos .end{display:flex;align-items:center;gap:12px}
+html[data-theme="dark"]{color-scheme:dark;--ivory:#0C2427;--paper:#0A1F22;--line:#1F3D41;--grey:#9AB0AD;--ink:#E4EEEC;--sf:#11302F;--hd:#EAF5F3}
+html[data-theme="dark"] body{background:#071A1D}
+html[data-theme="dark"] .wm{opacity:.035;filter:brightness(2.2)}
+/* surfaces */
+html[data-theme="dark"] :is(.search,.chip,.seg,.sort,.walk button,.step,.line,.sgc,.cft,.frm input,.frm select,.frm textarea,.opts label,.mini,.sz,.go.ghost,.more,.wa-now){background:var(--sf);border-color:var(--line);color:var(--ink)}
+html[data-theme="dark"] .search{box-shadow:0 16px 34px -20px rgba(0,0,0,.8),0 0 0 1px var(--line)}
+html[data-theme="dark"] .bar.stuck{background:rgba(7,26,29,.92)}
+html[data-theme="dark"] .chip.on,html[data-theme="dark"] .seg button.on{background:var(--t500);border-color:var(--t500);color:#fff}
+html[data-theme="dark"] .seg button{color:var(--grey)}
+html[data-theme="dark"] .sort{color:var(--ink)}
+html[data-theme="dark"] .search input{color:var(--ink)}
+html[data-theme="dark"] .search .clr{background:var(--line)}
+/* headings and strong text that were dark teal */
+html[data-theme="dark"] :is(.cat-head h3,.empty b,.det h2,.nh,.allh h2,.fh h2,.sgh b,.sgn,.suph b,.cempty b,.sum.tot,.frm label,.done-box b,.szb b,.sz .st span,.sz .st button,.sbl,.pkh b,.who b,.line .nm,.step .q,.step button,.chip,.go.ghost,.more,.walk button){color:var(--hd)}
+html[data-theme="dark"] :is(.sum b,.mini div b){color:var(--ink)}
+html[data-theme="dark"] .tier :is(.nt b,em){color:#13292B}
+html[data-theme="dark"] :is(.sheet .x,.slide .tag,.nav){color:#13292B}
+html[data-theme="dark"] .bnd :is(em,span){color:inherit}
+html[data-theme="dark"] :is(.fh .k,.allh .k,.sgw em,.count b,.szb .pp,.line .lt,.sum.tot b,.sgf span){color:var(--t300)}
+html[data-theme="dark"] .rail-off .fh .k{color:#E39A6F}
+html[data-theme="dark"] .det .fam,html[data-theme="dark"] .who{background:var(--sf);color:var(--grey)}
+html[data-theme="dark"] .sug{background:#0E2A2D}
+html[data-theme="dark"] .fam-sec .gbg{background:radial-gradient(120% 60% at 85% 0%,rgba(127,216,210,.09) 0%,rgba(127,216,210,.03) 60%,rgba(0,0,0,0) 100%)}
+html[data-theme="dark"] .sz.on,html[data-theme="dark"] .opts input:checked+label,html[data-theme="dark"] .buy .add.in,html[data-theme="dark"] .once{background:#123E3F;border-color:var(--t500);color:var(--hd)}
+html[data-theme="dark"] .buy .add.in .ed{color:var(--t300)}
+html[data-theme="dark"] .buy .add{background:var(--t600)}
+html[data-theme="dark"] .sz .plus,html[data-theme="dark"] .sga{background:var(--t500)}
+html[data-theme="dark"] .go:not(.wa):not(.ghost){background:var(--t600)}
+html[data-theme="dark"] .more:hover{background:var(--t600);color:#fff}
+html[data-theme="dark"] .line .szt{background:#123E3F;color:var(--t300)}
+html[data-theme="dark"] .wa-now{color:#4ADE80;border-color:#1F9D55}
+html[data-theme="dark"] .clear{color:#F08A8A}
+html[data-theme="dark"] .tile,html[data-theme="dark"] .cell:hover .tile{box-shadow:0 12px 26px -16px rgba(0,0,0,.9)}
+html[data-theme="dark"] .toast{background:var(--t600)}
+html[data-theme="dark"] .frm .msg{color:#F08A8A}
 </style>
 </head>
 <body>
 <img class="wm" src="img/ui/mark_teal.png" alt="">
 <header class="top"><div class="wrap">
-  <div class="logos"><img class="nbs" src="img/ui/logo_white.png" alt="نور النبراس"><img class="adf" src="img/ui/adf_full_white.png" alt="Amour De Fleurs"></div>
+  <div class="logos"><img class="nbs" src="img/ui/logo_white.png" alt="نور النبراس"><div class="end"><button class="theme" id="theme" type="button"><svg class="moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 14.5A8 8 0 1 1 9.5 4a6.5 6.5 0 0 0 10.5 10.5z"/></svg><svg class="sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="4.2"/><path d="M12 2v2.5M12 19.5V22M2 12h2.5M19.5 12H22M4.9 4.9l1.8 1.8M17.3 17.3l1.8 1.8M4.9 19.1l1.8-1.8M17.3 6.7l1.8-1.8"/></svg><span id="themel">لايت</span></button><img class="adf" src="img/ui/adf_full_white.png" alt="Amour De Fleurs"></div></div>
   <div><div class="kick">مكتبة زيوت ADF</div><h1>Amour <em>De</em> Fleurs</h1><div class="ar">زيوت عطرية فرنسية بأسعار الجملة<small>ابحث بين <b class="ltr" id="total">0</b> زيتاً · الأسعار بالدولار للكيلو</small></div></div>
   <div class="trio"><img class="a" src="img/ui/big_oud.png" alt=""><img class="c" src="img/ui/big_fresh.png" alt=""><img class="b" src="img/ui/big_floral.png" alt=""></div>
 </div></header>
@@ -795,6 +842,10 @@ function closeCart(fromPop){
   if (fromPop !== true && history.state) history.back();
 }
 $('cfab').onclick = () => openCart('list');
+// night / light toggle
+const syncTheme = () => { const d = document.documentElement.dataset.theme === 'dark'; $('themel').textContent = d ? 'لايت' : 'نايت'; $('theme').setAttribute('aria-label', d ? 'تفعيل الوضع الفاتح' : 'تفعيل الوضع الليلي'); document.querySelector('meta[name=theme-color]').content = d ? '#071A1D' : '#022B30'; };
+$('theme').onclick = () => { const t = document.documentElement.dataset.theme === 'dark' ? 'light' : 'dark'; document.documentElement.dataset.theme = t; try { localStorage.setItem('adf_theme', t); } catch(e) {} syncTheme(); };
+syncTheme();
 $('supb').onclick = openSup; $('sscrim').onclick = closeSup;
 $('cx').onclick = () => closeCart(); $('cscrim').onclick = () => closeCart(); $('pscrim').onclick = closePick;
 window.addEventListener('popstate', () => { if ($('cart').classList.contains('on')) closeCart(true); });
