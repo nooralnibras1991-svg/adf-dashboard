@@ -185,7 +185,7 @@ footer .end{font-family:var(--nk);color:var(--beige);font-size:18px;margin-top:6
 @media (min-width:900px){
   .sheet{left:50%;right:auto;top:50%;bottom:auto;width:min(1000px,92vw);max-height:88vh;border-radius:16px;transform:translate(-50%,-46%) scale(.96);opacity:0;pointer-events:none;transition:transform .4s var(--ease),opacity .3s var(--ease)}
   .sheet.on{transform:translate(-50%,-50%);opacity:1;pointer-events:auto}
-  .sheet .body{display:grid !important;grid-template-columns:1.05fr 1fr;align-items:start}
+  .sheet .body{display:grid !important;grid-template-columns:minmax(0,1.05fr) minmax(0,1fr);align-items:start;overflow-x:hidden}
   .sheet .handle{display:none}
   /* the picture column fills the full sheet height and stays put while the details scroll */
   .sheet .car{position:sticky;top:0;height:88vh}
@@ -235,7 +235,7 @@ footer .end{font-family:var(--nk);color:var(--beige);font-size:18px;margin-top:6
 .nav svg{width:18px;height:18px;color:var(--t800)}
 .nav.prev{right:14px}.nav.next{left:14px}
 .nav[disabled]{opacity:0;pointer-events:none}
-.det{padding:22px 20px calc(24px + env(safe-area-inset-bottom))}
+.det{min-width:0;padding:22px 20px calc(24px + env(safe-area-inset-bottom))}
 .det .fam{display:inline-flex;align-items:center;gap:8px;font-size:13px;color:var(--grey);background:var(--ivory);border-radius:20px;padding:5px 12px 5px 6px}
 .det .fam img{width:24px;height:24px;object-fit:contain}
 .det h2{font-family:var(--nk);font-size:clamp(28px,5vw,38px);font-weight:700;color:var(--t900);margin-top:10px;line-height:1.3}
@@ -357,7 +357,7 @@ html.anim .fam-sec.in .banner .art img{scale:1}
 .line .rm{border:0;background:transparent;color:var(--grey);cursor:pointer;padding:4px;display:grid;place-items:center}
 .line .rm svg{width:18px;height:18px}
 /* scent suggestions */
-.sug{margin-top:18px;background:var(--ivory);border-radius:14px;padding:14px 0 12px}
+.sug{min-width:0;max-width:100%;margin-top:18px;background:var(--ivory);border-radius:14px;padding:14px 0 12px}
 .sgh{padding:0 14px 10px}
 .sgh b{display:block;font-family:var(--nk);font-size:18px;color:var(--t900);line-height:1.3}
 .sgh span{font-size:12.5px;color:var(--grey)}
